@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
 	"errors"
+	"fmt"
+	"io"
 	"os"
+	"strings"
 )
 
 // QuestionAnswer holds the question and answer
@@ -13,7 +17,12 @@ type QuestionAnswer struct {
 }
 
 func main() {
-
+	quizKey, err := readQuizKey("problems.csv")
+	if err != nil {
+		fmt.Println("Error reading quiz file: ", err.Error())
+	} else {
+		PlayGame(quizKey)
+	}
 }
 
 func readQuizKey(filename string) ([]QuestionAnswer, error) {
@@ -38,4 +47,39 @@ func readQuizKey(filename string) ([]QuestionAnswer, error) {
 	}
 
 	return quizKey, returnError
+}
+
+//PlayGame - execute the quiz for the user and total their results
+func PlayGame(quiz []QuestionAnswer) {
+
+}
+
+// GiveQuestion - list out the question and verify the answer from the user
+func GiveQuestion(problem QuestionAnswer, stdin io.Reader) (bool, error) {
+	result := false
+	var returnError error
+
+	fmt.Print("Question: ", problem.Question)
+	answer, err := ReadUserResponse(stdin)
+	if err != nil {
+		returnError = errors.New(err.Error())
+	} else {
+		// strip the newline from the answer
+		answer = strings.TrimSuffix(answer, "\n")
+
+		if answer == problem.Answer {
+			result = true
+		}
+	}
+
+	fmt.Println("")
+
+	return result, returnError
+}
+
+// ReadUserResponse reads user input
+func ReadUserResponse(stdin io.Reader) (string, error) {
+	reader := bufio.NewReader(stdin)
+	text, err := reader.ReadString('\n')
+	return text, err
 }
